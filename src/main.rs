@@ -61,15 +61,19 @@ fn check_path(arg: &str) -> Option<String> {
                 match path.join("Cargo.lock").to_str() {
                     Some(file_path) => check_path(file_path),
                     None => {
-                        eprintln!("Error: failure appending Cargo.lock to {arg}");
+                        eprintln!("Error: failure appending Cargo.lock to {}", arg);
                         process::exit(1);
                     }
                 }
             }
         }
         Ok(false) => {
-            eprintln!("Error: cannot find file {arg}");
-            process::exit(1);
+            if arg.strip_prefix("crate:").is_some() {
+                path.to_str().map(|path_str| path_str.to_string())
+            } else {
+                eprintln!("Error: cannot find file {arg}");
+                process::exit(1);
+            }
         }
         Err(e) => {
             eprintln!("Error: {}", e);
